@@ -1,17 +1,21 @@
 require 'sinatra'
-#require "selenium-webdriver"
+require "selenium-webdriver"
 
 get '/' do
 	'Put this in your pipe & smoke it!'
 
-#	driver = Selenium::WebDriver.for :firefox
-#	driver.navigate.to "http://google.com"
+end
 
-#	element = driver.find_element(name: 'q')
-#	element.send_keys "Hello WebDriver!"
-#	element.submit
+get '/sele' do
+	
+	driver = Selenium::WebDriver.for :chrome
+	driver.navigate.to "http://google.com"
 
-#	puts driver.title
+	element = driver.find_element(name: 'q')
+	element.send_keys "Hello WebDriver!"
+	element.submit
 
-#	driver.quit
+	puts driver.title
+
+	driver.quit
 end

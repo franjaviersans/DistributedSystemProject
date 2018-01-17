@@ -1,0 +1,4 @@
+docker run -d --name fran -p 80:80 -p 3333:4444 -v ($PWD):/usr/src/app --shm-size=2g -e MAIN_APP_FILE=serverRest.rb -d selenium_sinatra
+
+
+docker run -d -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-chrome

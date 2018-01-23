@@ -1,5 +1,17 @@
-sudo docker run  -d  --name fran -p 3838:80  -p 3333:4444 -v $(pwd):/usr/src/app --shm-size=2g -e MAIN_APP_FILE=serverRest.rb selenum_sinatra
+docker network mynet
+
+
+docker run  -d  --name fran --net mynet -p 3838:80  -p 3333:4444 -v $(pwd):/usr/src/app --shm-size=2g -e MAIN_APP_FILE=serverRest.rb selenium_sinatra_firefox
+
+docker run -it --rm  --net mynet  --name running_client_app client_app
+
 
 
 
 docker run -d -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-chrome
+
+
+
+
+docker build -t client_app ./
+

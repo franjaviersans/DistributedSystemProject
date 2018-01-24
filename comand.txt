@@ -1,9 +1,9 @@
 docker network mynet
+docker run  -d  --name seleniumserver1 --net mynet -p 3838:80  -p 3333:4444 -v $(pwd):/usr/src/app --shm-size=2g -e MAIN_APP_FILE=serverRest.rb selenium_sinatra_firefox
+docker run  -d  --name seleniumserver2 --net mynet -p 2929:80  -p 5555:4444 -v $(pwd):/usr/src/app --shm-size=2g -e MAIN_APP_FILE=serverRest.rb selenium_sinatra_firefox
 
 
-docker run  -d  --name fran --net mynet -p 3838:80  -p 3333:4444 -v $(pwd):/usr/src/app --shm-size=2g -e MAIN_APP_FILE=serverRest.rb selenium_sinatra_firefox
-
-docker run -it --rm  --net mynet  --name running_client_app client_app
+docker run -it --rm  --net mynet  --name running_client_app client_app https://github.com/SeleniumHQ/selenium/wiki/Ruby-Bindings github.com 5
 
 
 

@@ -7,4 +7,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD [ "python", "./client.py" ]
+ENTRYPOINT ["python", "./client.py"]
+

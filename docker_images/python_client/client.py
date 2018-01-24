@@ -7,7 +7,7 @@ import sys
 if len(sys.argv) != 4:
 	sys.exit("Program should be run with the parameters: INITIAL_URL FILTER_URL MAX_LINKS")
 
-initial_url = sys.argv[1]
+initial_url_f = sys.argv[1]
 filter_url = sys.argv[2] #domain to filter pages
 max_links = int(sys.argv[3])
 all_empty = False
@@ -25,6 +25,20 @@ dupliSet = set()
 
 #list for visited url
 visited = []
+
+
+class visitedLink():
+	def __init__(self, link, status):
+		self.link = link
+		self.status = status
+
+
+#fill the queue with the file
+print("Initial links to visit:")
+with open(initial_url_f) as f:
+	for line in f:
+		print(line)
+		workQueue.put(line)
 
 
 class myThread (threading.Thread):
@@ -88,9 +102,6 @@ class myThread (threading.Thread):
 						print(str(self.name)+": Queue empty for the moment")
 
 			print(str(self.name)+": Processing the url: "+str(url))
-
-			#mark this link as visited
-			visited.append(url)
 			
 			with lock:
 				max_links -= 1
@@ -99,6 +110,9 @@ class myThread (threading.Thread):
 			payload = {'page':url}
 			r = requests.get(self.server_url, params=payload)
 
+
+			#mark this link as visited
+			visited.append(visitedLink(url, r.status_code))
 
 			#check if the server respond a correct message
 			if r.status_code != 200 or r.headers['content-type'] != 'application/json' :
@@ -138,8 +152,6 @@ reg = [Register('Thread 1', 'http://seleniumserver1/pages'), Register('Thread 2'
 threads = []
 threadID = 0
 
-workQueue.put(initial_url)
-
 #create new threads
 for r in reg:
    thread = myThread(threadID, r.name, r.server)
@@ -155,6 +167,9 @@ for t in threads:
 
 print("Finishing program")
 
-print("Visited links:")
-for x in visited :
-	print(x)
+print("Visited links stored in log.txt")
+with open("log.txt", "w") as f:
+	for x in visited :
+		f.write("Status: "+str(x.status)+"\n")
+		f.write("Link: "+str(x.link))
+

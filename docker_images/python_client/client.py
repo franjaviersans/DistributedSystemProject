@@ -107,58 +107,69 @@ class myThread (threading.Thread):
 			with lock:
 				max_links -= 1
 
-			#send get request server with page as query
-			payload = {'page':url}
-			r = requests.post(self.server_url+"/pages", params=payload)
+			try:
+				#send get request server with page as query
+				payload = {'page':url}
+				r = requests.post(self.server_url+"/pages", params=payload)
 
-
-			if(r.status_code != 200):
-				print(str(self.name)+"An error ocurred with the selenium server")
-			else:
-
-				waited_time = 0
-				max_wait_time = 5 * 60
-
-				#obtain response with url
-				r = requests.get(self.server_url+"/response")
-
-				while r.headers['content-type'] != 'application/json' and r.text == 'Not ready' and waited_time < max_wait_time:
-					#print(str(self.name)+"Response not ready waiting for 5 more seconds. Total waitting time: " + str(waited_time))
-					r = requests.get(self.server_url+"/response")
-					time.sleep(10)
-					waited_time = waited_time + 5
-
-				#mark this link as visited
-				visited.append(visitedLink(url, r.status_code))
-
-
-
-				
-				#if the answer was never ready go to next interation
-				if(waited_time > max_wait_time):
-					print("Waited 5 minutes for the answer to be ready and never happend. Going to process next link")
+				if(r.status_code != 200):
+					print(str(self.name)+"An error ocurred with the selenium server")
 				else:
-					#check if the server respond a correct message
-					if r.status_code != 200 or r.headers['content-type'] != 'application/json' :
-						#if it is not the case, print the error message
-						print(str(self.name)+"Problem accessing page with status "+str(r.status_code)+" and response type " +(r.headers['content-type']))
-					else:
-						#if the server respond correctly, get json a filter responses
-						resJson = r.json()
-						my_list = [x for x in resJson if (filter_url in x)]
 
-						#add each element to the global queue
-						print(str(self.name)+"Placing " +str(len(my_list))+" new links ")
-						for e in my_list:
-							with lock:
-								if e not in dupliSet:
-									try:
-										dupliSet.add(e)
-										workQueue.put_nowait(e)
-									except :
-										#queue full, but that doesnt matter
-										pass
-				
+					waited_time = 0
+					max_wait_time = 5 * 60
+
+					#obtain response with url
+					r = requests.get(self.server_url+"/response")
+
+					while r.headers['content-type'] != 'application/json' and r.text == 'Not ready' and waited_time < max_wait_time:
+						print(str(self.name)+"Response not ready waiting for 10 more seconds. Total waitting time: " + str(waited_time))
+						r = requests.get(self.server_url+"/response")
+						time.sleep(10)
+						waited_time = waited_time + 10
+
+					#mark this link as visited
+					visited.append(visitedLink(url, r.status_code))
+
+					if(r.status_code == 550):
+						print(str(self.name)+"There was a problem with the server trying to fetch the URL with selenium. Skipping to next URL. Error Message:" + str(r.text))
+					else:
+						#if the answer was never ready go to next interation
+						if(waited_time > max_wait_time):
+							print(str(self.name)+"Waited 5 minutes for the answer to be ready and never happend. Going to process next URL.")
+						else:
+							#check if the server respond a correct message
+							if r.status_code != 200 or r.headers['content-type'] != 'application/json' :
+								#if it is not the case, print the error message
+								print(str(self.name)+"Problem accessing page with status "+str(r.status_code)+" and response type " +(r.headers['content-type']))
+							else:
+								#if the server respond correctly, get json a filter responses
+								resJson = r.json()
+								my_list = [x for x in resJson if (filter_url in x)]
+
+								#add each element to the global queue
+								print(str(self.name)+"Placing " +str(len(my_list))+" new links ")
+								for e in my_list:
+									with lock:
+										if e not in dupliSet:
+											try:
+												dupliSet.add(e)
+												workQueue.put_nowait(e)
+											except :
+												#queue full, but that doesnt matter
+												pass
+			
+			except requests.exceptions.Timeout:
+				# Maybe set up for a retry, or continue in a retry loop
+				print(str(self.name)+"The seleniun server had a timeout.")
+				with lock:			
+					empty[self.threadID] = True
+				sys.exit(1)
+			except requests.exceptions.RequestException as e:
+				print(str(self.name)+"There was an error with the selenium server: " +str(e))
+				with lock:			
+					empty[self.threadID] = True
+				sys.exit(1)
 
 			#indicate to the queue that the task with this elment is completed
 			workQueue.task_done()

@@ -1,8 +1,0 @@
-Status: 200
-Link: https://github.com/franjaviersans/DistributedSystemProject
-Status: 200
-Link: https://github.com/chafey/dicomParser
-Status: 200
-Link: https://github.com/Status: 200
-Link: https://github.com/franjaviersans/DistributedSystemProject#start-of-contentStatus: 200
-Link: https://github.com/features

@@ -7,6 +7,7 @@ WORKDIR /usr/src/app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY startup.sh ./
 
-ENTRYPOINT ["python", $MAIN_APP_FILE]
+ENTRYPOINT ["/bin/bash", "./startup.sh"]
 

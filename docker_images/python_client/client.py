@@ -2,6 +2,7 @@ import requests
 import queue
 import threading
 import sys
+import time
 
 #global variables for the application
 if len(sys.argv) != 4:
@@ -96,45 +97,69 @@ class myThread (threading.Thread):
 						if x:
 							all_empty = True
 						if all_empty :
-							print(str(self.name)+": There are no more threads working and no more links to fetch")
+							print(str(self.name)+"There are no more threads working and no more links to fetch")
 							return 
 
-						print(str(self.name)+": Queue empty for the moment")
+						print(str(self.name)+"Queue empty for the moment")
 
-			print(str(self.name)+": Processing the url: "+str(url))
+			print(str(self.name)+"Processing the url: "+str(url))
 			
 			with lock:
 				max_links -= 1
 
 			#send get request server with page as query
 			payload = {'page':url}
-			r = requests.get(self.server_url, params=payload)
+			r = requests.post(self.server_url+"/pages", params=payload)
 
 
-			#mark this link as visited
-			visited.append(visitedLink(url, r.status_code))
-
-			#check if the server respond a correct message
-			if r.status_code != 200 or r.headers['content-type'] != 'application/json' :
-				#if it is not the case, print the error message
-				print(str(self.name)+": Problem accessing page with status "+str(r.status_code)+" and response type " +(r.headers['content-type']))
+			if(r.status_code != 200):
+				print(str(self.name)+"An error ocurred with the selenium server")
 			else:
-				#if the server respond correctly, get json a filter responses
-				resJson = r.json()
-				my_list = [x for x in resJson if (filter_url in x)]
 
-				#add each element to the global queue
-				print(str(self.name)+": Placing " +str(len(my_list))+" new links ")
-				for e in my_list:
-					with lock:
-						if e not in dupliSet:
-							try:
-								dupliSet.add(e)
-								workQueue.put_nowait(e)
-							except :
-								#queue full, but that doesnt matter
-								pass
+				waited_time = 0
+				max_wait_time = 5 * 60
+
+				#obtain response with url
+				r = requests.get(self.server_url+"/response")
+
+				while r.headers['content-type'] != 'application/json' and r.text == 'Not ready' and waited_time < max_wait_time:
+					#print(str(self.name)+"Response not ready waiting for 5 more seconds. Total waitting time: " + str(waited_time))
+					r = requests.get(self.server_url+"/response")
+					time.sleep(10)
+					waited_time = waited_time + 5
+
+				#mark this link as visited
+				visited.append(visitedLink(url, r.status_code))
+
+
+
 				
+				#if the answer was never ready go to next interation
+				if(waited_time > max_wait_time):
+					print("Waited 5 minutes for the answer to be ready and never happend. Going to process next link")
+				else:
+					#check if the server respond a correct message
+					if r.status_code != 200 or r.headers['content-type'] != 'application/json' :
+						#if it is not the case, print the error message
+						print(str(self.name)+"Problem accessing page with status "+str(r.status_code)+" and response type " +(r.headers['content-type']))
+					else:
+						#if the server respond correctly, get json a filter responses
+						resJson = r.json()
+						my_list = [x for x in resJson if (filter_url in x)]
+
+						#add each element to the global queue
+						print(str(self.name)+"Placing " +str(len(my_list))+" new links ")
+						for e in my_list:
+							with lock:
+								if e not in dupliSet:
+									try:
+										dupliSet.add(e)
+										workQueue.put_nowait(e)
+									except :
+										#queue full, but that doesnt matter
+										pass
+				
+
 			#indicate to the queue that the task with this elment is completed
 			workQueue.task_done()
 				
@@ -148,7 +173,7 @@ class Register(object):
 		self.server = server
 
 #information about the threads
-reg = [Register('Thread 1', 'http://seleniumserver1/pages'), Register('Thread 2', 'http://seleniumserver2/pages')]
+reg = [Register('Thread 1: ', 'http://seleniumserver1'), Register('Thread 2: ', 'http://seleniumserver2')]
 threads = []
 threadID = 0
 

@@ -123,7 +123,7 @@ class myThread (threading.Thread):
 					r = requests.get(self.server_url+"/response")
 
 					while r.headers['content-type'] != 'application/json' and r.text == 'Not ready' and waited_time < max_wait_time:
-						print(str(self.name)+"Response not ready waiting for 10 more seconds. Total waitting time: " + str(waited_time))
+						print(str(self.name)+"Response not ready waiting for 10 more seconds. Total waiting time: " + str(waited_time))
 						r = requests.get(self.server_url+"/response")
 						time.sleep(10)
 						waited_time = waited_time + 10
@@ -207,5 +207,5 @@ print("Visited links stored in log.txt")
 with open("log.txt", "w") as f:
 	for x in visited :
 		f.write("Status: "+str(x.status)+"\n")
-		f.write("Link: "+str(x.link))
+		f.write("Link: "+str(x.link)+" \n)
 

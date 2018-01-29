@@ -10,6 +10,8 @@ docker run -it --rm  --net mynet  --name running_client_app client_app https://g
 
 docker run -d -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-chrome
 
+docker run --name db -d -p 27017:27017 -v $(pwd)/data:/data/db mongo
+
 
 
 

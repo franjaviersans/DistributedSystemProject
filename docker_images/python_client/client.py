@@ -207,5 +207,5 @@ print("Visited links stored in log.txt")
 with open("log.txt", "w") as f:
 	for x in visited :
 		f.write("Status: "+str(x.status)+"\n")
-		f.write("Link: "+str(x.link)+" \n)
+		f.write("Link: "+str(x.link)+" \n")
 

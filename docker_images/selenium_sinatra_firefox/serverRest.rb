@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'selenium-webdriver'
 require 'json'
+require 'mongo'
 
 
 set :bind, '0.0.0.0'
@@ -10,6 +11,16 @@ ready = false
 output_links = Array.new
 tr = nil
 error_message = ''
+
+#connection to database
+db_route = ARGV[2]
+
+client = Mongo::Client.new('mongodb://'+db_route+':27017/local')
+db = client.database
+collection = client[:web_pages]
+
+
+
 
 get '/response' do
 
@@ -72,6 +83,10 @@ post '/pages' do
 					output_links << ref
 			    end 
 			end
+
+
+			doc = {pageLink: page, innerHTLM: driver.page_source}
+			result = collection.insert_one(doc)
 
 			driver.quit
 

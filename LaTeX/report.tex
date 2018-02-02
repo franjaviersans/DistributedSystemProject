@@ -1,0 +1,128 @@
+\documentclass[12pt,letterpaper,final,oneside,openany,onecolumn]{article} 												
+\usepackage[lmargin=3.5cm,rmargin=2.5cm,tmargin=3.0cm,bmargin=3.0cm]{geometry}
+\usepackage[latin1]{inputenc}												%european
+\usepackage[T1]{fontenc}
+\usepackage[]{times}
+\usepackage{amsmath}																%math package
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage[footnotesize]{subfigure}
+\usepackage[font=footnotesize]{caption}
+\usepackage{makeidx}
+\usepackage{color}
+\usepackage[hidelinks]{hyperref}
+\usepackage{epstopdf}
+\usepackage{tabulary}
+
+
+%\renewcommand{\baselinestretch}{1}
+%\renewcommand{\contentsname}{Índice General}%{Tabla de Contenidos}
+%\renewcommand{\listfigurename}{Lista de Figuras}
+%\renewcommand{\listtablename}{\'Indice de Tablas}
+%\renewcommand{\chaptername}{Capítulo}
+%\renewcommand{\bibname}{Bibliografía}
+\renewcommand\floatpagefraction{.9}
+\renewcommand\topfraction{.9}
+\renewcommand\bottomfraction{.9}
+\renewcommand\textfraction{.1}
+
+\setcounter{totalnumber}{50}
+\setcounter{topnumber}{50}
+\setcounter{bottomnumber}{50}
+
+% Different font in captions
+\newcommand{\captionfonts}{\small}
+
+\makeatletter  % Allow the use of @ in command names
+\long\def\@makecaption#1#2{%
+  \vskip\abovecaptionskip
+  \sbox\@tempboxa{{\captionfonts #1: #2}}%
+  \ifdim \wd\@tempboxa >\hsize
+    {\captionfonts #1: #2\par}
+  \else
+    \hbox to\hsize{\hfil\box\@tempboxa\hfil}%
+  \fi
+  \vskip\belowcaptionskip}
+\makeatother   % Cancel the effect of \makeatletter
+
+
+
+\newcommand\blfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}
+
+
+
+\pagenumbering{gobble}
+
+
+%Inicio de documento
+\begin{document}
+		
+		
+		
+\noindent		
+Universidad Central de Venezuela.\\
+Facultad de Ciencias.\\
+Postgrado en Computación.\\
+Desarrollo de Aplicaciones Distribuidas .\\
+\hspace*{\fill} Francisco Sans.
+
+\section*{\center{Robot Web Distribuido: Reporte Proyecto 1}}
+
+\section{Análisis del problema}
+
+
+\section{Diseño de la Solución}
+
+La solución propuesta constará de un conjunto de componentes distribuidos que se encargarán de realizar el acceso a los enlaces suministrados.
+Para ello, se utilizarán containers de Docker para separar en un mismo entorno físico cada uno de los componentes.
+Para la comunicación entre el planificador y los descargadores se utilizó un servidor REST del lado de los descargadores, servicio que el planificador consumirá como cliente.
+
+
+Para programa el planificador, se utilizó el lenguaje de programación Python junto con la librería Request~\footnote{http://docs.python-requests.org/en/master/} para el consumo de los servicios.
+Se recibirá como entrada un archivo con la enlaces semillas para empezar a realizar
+
+JSON
+
+
+Para los descargadores se utilizó el lenguaje de programación Ruby, el cual se utiliza junto a la librería Sinatra~\footnote{http://sinatrarb.com/} para montar el servidor REST.
+Además, el descargador tendrá un servidor Selenium~\footnote{http://www.seleniumhq.org/} stand-alone para Firefox.
+El Selenium se encargará de hacer el renderizado de la página, para así poder obtener una imagen fidedigna de la misma.
+A partir del resultado obtenido por Selenium, el descargador obtendrá todos los enlaces contenidos en las etiquetas \textsl{<a>} 
+
+
+get /post
+
+Finalmente los almacenes de datos fueron implementados con MongoDB como una base NoSQL, que se utiliza para almacenar el código fuente de la página tal y como es obtenido por Selenium.
+
+El código fuente del proyecto puede encontrarse ubicado en GitHub~\footnote{https://github.com/franjaviersans/DistributedSystemProject}.
+
+
+
+
+\section{Scripts de Ejecución}
+
+Para facilitar la instalación, ejecución y prueba de la solución, se presentan un conjunto de scripts que contienen un conjunto de comandos para realizar estas tareas de manera automática.
+Los \textit{scripts} tienen el siguiente uso:
+
+\begin{itemize}
+	\item install\_containers.sh: se encarga de la ejecución de dos DOCKERFILEs, correspondientes a: (1) la imagen de Python instalando la librería \textsl{request} para realizar consultas REST; y (2) la imagen del selenium stand-alone con Firefox, instalando Ruby con las librerías \textit{sinatra}, \textsl{selenium-webdriver}, \textsl{json} y \textsl{mongo}. 
+Además, este script también se encarga de descargar la imagen de mongo sin ningún complemento adicional.
+	\item start\_containers.sh: en este script se inician las imágenes de los descargadores, de las bases de datos y de la red de comunicación.
+Para las bases de datos se crean directorios para almacenar la información de las páginas.
+	\item start\_client.sh: inicia el container del planificador, que se encargará de realizar la tarea del robot.
+	\item kill\_containers.sh: es utilizado para remover de docker los containers utilizados para el planificador, los descargadores y las bases de datos.
+Adicionalmente, también se elimina la red creada para la communicación y los directorios que contienen las bases de datos, de tal manera de limpiar la computadora de la ejecución del programa.
+\end{itemize}
+ 
+
+\end{document}
+
+
+

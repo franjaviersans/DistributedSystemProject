@@ -3,7 +3,7 @@ This is a distributed system project for my postgraduate course. The idea is to 
 
 
 <p align="center">
-  <img src ="./screenshot.png" />
+  <img src ="./LaTeX/screenshot.png" />
 </p>
 
 

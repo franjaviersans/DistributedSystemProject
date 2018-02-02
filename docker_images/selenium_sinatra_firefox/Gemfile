@@ -9,3 +9,7 @@ gem "selenium-webdriver"
 
 # declare the json dependency
 gem "json"
+
+
+# declare the mongo dependency
+gem "mongo"

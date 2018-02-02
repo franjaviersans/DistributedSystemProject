@@ -122,6 +122,7 @@ RUN mkdir -p "$GEM_HOME" "$BUNDLE_BIN" \
 #to run sinatra server
 ENV RACK_ENV production
 ENV MAIN_APP_FILE web.rb
+ENV DBDNS=data1
 
 RUN mkdir -p /usr/src/app
 

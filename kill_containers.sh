@@ -1,9 +1,23 @@
 #!/bin/bash -v
-docker rm -f seleniumserver1
-docker rm -f seleniumserver2
-docker rm -f db1
-docker rm -f db2
+
+#remove serverts
+while IFS='' read -r line || [[ -n "$line" ]]; do
+    docker rm -f $line
+done < "servers.txt"
+
+#remove databases
+while IFS='' read -r line || [[ -n "$line" ]]; do
+    docker rm -f $line
+    rm -Rf $line
+done < "databases.txt"
+
+#remove client, just in case
 docker rm -f running_client_app
+
+#remove network
 docker network rm mynet
-rm -Rf data1
-rm -Rf data2
+
+#remove files
+rm servers.txt
+rm databases.txt
+rm ./docker_images/python_client/servers.txt

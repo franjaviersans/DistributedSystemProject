@@ -93,13 +93,13 @@ La conexión de todas los componentes se apoya en la opción \textsl{- -net <nombr
 
 Para la comunicación entre el planificador y los descargadores se utilizó un servidor REST del lado de los descargadores, servicio que el planificador consumirá como cliente.
 En la programación el planificador se utilizó el lenguaje de programación Python junto con la librería Requests\footnote{http://docs.python-requests.org/en/master/} para el consumo de los servicios.
-Se recibirá como entrada un archivo con los enlaces semilla para empezar a inspeccionar los URL, además de un URL de domino base para filtrar la inspección de URLs, y un entero máximo de URLs a visitar.
+Se recibirá como entrada un archivo con los enlaces semilla para empezar a inspeccionar los URL, además de un URL de domino base para filtrar la inspección de URLs, un entero máximo de URLs a visitar, y una lista de descargadores a los cuales conectarse.
 El cliente maneja un hilo por cada descargador disponible, donde cada hilo se encargará de consumir URLs de la cola hasta que no haya más cosas a procesar, o la cantidad máxima de URLs ya haya sido procesado.
 A través de un mensaje POST un hilo envía a su correspondiente descargador la dirección URL a procesar, y posteriormente obtiene en formato JSON los nuevos URLs encontrados a través de un mensaje GET al descargador.
 Se utilizan dos mensaje para evitar que haya un timeout por la espera de resultados.
 El mensaje GET podría retornar que el resultado todavía no está listo en el momento indicado, debido a que el descargador todavía está procesando la solicitud, por lo que se realiza un proceso de espera activa, mandando varios mensajes GET hasta obtener los resultados.
 Una vez obtenido los URLs de resultado, se procede a añadir en la cola aquellos elementos que no fueron añadidos anteriomente y que están dentro del dominio de filtrado.
-Posteriormente, el hilo vuelve a agarrar un URL de la cola y repite el procedimiento.
+Posteriormente, el hilo vuelve a obtener un URL de la cola y repite el procedimiento.
 Los hilos terminarán su ejecución si ya procesaron la cantidad de URL máxima, o si ningún hilo tiene más URLs a procesar.
 Finalmente, los URL procesados con el estatus regresado por el servidor son almanceados en un archivo \textsl{log.txt} que puede ser accedido por el usuario al finalizar la ejecución del cliente.
 
@@ -137,10 +137,10 @@ Además, este script también se encarga de descargar la imagen de mongo sin ningú
 	\item start\_containers.sh: en este script se inician las imágenes de los descargadores, de las bases de datos y de la red de comunicación.
 Para las bases de datos se crean directorios para almacenar la información de las páginas.
 Los descargadores correrán el archivo ruby con el nombre \textsl{serverRest.rb}, el cual tiene toda la lógica del servidor.
-Por defecto se crean 2 descargadores con sus respectivas bases de datos.
+El script recibe por parámetro un número entero que indica la cantidad de descargadores que quieren iniciarse, y el nombre de cada uno con sus respectivas bases de datos son almacenados en archivos, de tal manera que el cliente pueda accederlas fácilmente.
 	\item start\_client.sh: inicia el container del planificador, que se encargará de realizar la tarea del robot.
 El planificador correrá el archivo \textsl{client.py}, el cual contiene toda la lógica del cliente.
-Por defecto está configurado para trabajar solamente con los dos descargadores iniciados en el script anterior.
+El cliente leerá los descargadores disponibles del archivo generado por el script anterior.
 	\item kill\_containers.sh: es utilizado para remover de Docker los containers utilizados para el planificador, los descargadores y las bases de datos.
 Adicionalmente, también se elimina la red creada para la communicación y los directorios que contienen las bases de datos, de tal manera de limpiar la computadora de la ejecución del programa.
 \end{itemize}

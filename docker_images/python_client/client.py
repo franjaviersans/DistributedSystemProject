@@ -5,12 +5,13 @@ import sys
 import time
 
 #global variables for the application
-if len(sys.argv) != 4:
-	sys.exit("Program should be run with the parameters: INITIAL_URL FILTER_URL MAX_LINKS")
+if len(sys.argv) != 5:
+	sys.exit("Program should be run with the parameters: INITIAL_URL FILTER_URL MAX_LINKS FILE_WITH_SERVERS_URL")
 
 initial_url_f = sys.argv[1]
 filter_url = sys.argv[2] #domain to filter pages
 max_links = int(sys.argv[3])
+servers_f = sys.argv[4] #file with selenium servers name
 all_empty = False
 empty = [False, False]
 
@@ -52,9 +53,9 @@ class myThread (threading.Thread):
 
 
 	def run(self):
-		print(str(self.name)+": Starting")
+		print(str(self.name)+"Starting")
 		self.process_data()
-		print(str(self.name)+": Exiting")
+		print(str(self.name)+"Exiting")
 
 	def process_data(self):
 		global filter_url
@@ -183,17 +184,29 @@ class Register(object):
 		self.name = name
 		self.server = server
 
-#information about the threads
+
+
+
 reg = [Register('Thread 1: ', 'http://seleniumserver1'), Register('Thread 2: ', 'http://seleniumserver2')]
 threads = []
 threadID = 0
 
-#create new threads
-for r in reg:
-   thread = myThread(threadID, r.name, r.server)
-   threads.append(thread)
-   threadID += 1
-   thread.start()
+#information about the threads
+print("Reading selenium server information")
+with open(servers_f) as f:
+	for line in f:
+		#removing final endline
+		line = line.rstrip('\n')
+
+		ser = "http://"+line
+		print("Connection with "+ser)
+		
+		#create new threads
+		thread = myThread(threadID, "Thread "+str(threadID)+": ", ser)
+		threads.append(thread)
+		threadID += 1
+		thread.start()
+   
 
 
 
